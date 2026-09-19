@@ -1,0 +1,36 @@
+name: quran_khatma
+description: "تطبيق ختم القرآن الكريم التحفيزي - مجمع الملك فهد"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  hive: ^2.2.3                 # قاعدة بيانات محلية سريعة وخفيفة
+  hive_flutter: ^1.1.0         # دعم Hive لـ Flutter
+  provider: ^6.1.1             # إدارة الحالة ببساطة وكفاءة
+  flutter_screenutil: ^5.9.3   # للتجاوب مع كافة أحجام الشاشات (هواتف، تابلت، حواسيب)
+  path_provider: ^2.1.2        # مسارات التخزين المحلي للأجهزة المختلفة
+  quran: ^1.4.1                # ترقيم صفحات مصحف المدينة أوفلاين
+  share_plus: ^11.0.0          # مشاركة بطاقة الحديث
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0        # 3.0.0 يتعارض مع حزمة quran
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/mushaf/pages/
+  fonts:
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700
