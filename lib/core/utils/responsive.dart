@@ -52,4 +52,36 @@ class Responsive {
   static double capped(num design, double scaled) {
     return math.min(scaled, design * 1.35);
   }
+
+  /// هامش بصري نظيف حول صفحة المصحف حسب عرض الجهاز.
+  static double mushafFullscreenGutter(double width) {
+    if (width >= 1024) return 24;
+    if (width >= 600) return 18;
+    return 14;
+  }
+
+  /// هوامش أمان لصور المصحف حتى لا تلامس الحواف أو شريط التحكم السفلي.
+  static EdgeInsets mushafPageInsets(
+    BuildContext context, {
+    required bool fullscreen,
+  }) {
+    final safe = MediaQuery.paddingOf(context);
+    final size = sizeOf(context);
+    final width = size.width;
+    final side = mushafFullscreenGutter(width);
+    final top = width >= 1024 ? 18.0 : width >= 600 ? 14.0 : 12.0;
+    final bottom = width >= 1024 ? 28.0 : width >= 600 ? 24.0 : 22.0;
+
+    if (!fullscreen) {
+      return EdgeInsets.fromLTRB(side, top, side, bottom);
+    }
+
+    final fabClearance = (size.height * 0.055).clamp(32.0, 52.0);
+    return EdgeInsets.fromLTRB(
+      safe.left + side,
+      safe.top + top,
+      safe.right + side,
+      bottom + fabClearance,
+    );
+  }
 }

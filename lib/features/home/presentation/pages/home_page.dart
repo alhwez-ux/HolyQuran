@@ -17,6 +17,7 @@ import '../../../streak/presentation/pages/journey_screen.dart';
 import '../../../streak/presentation/providers/streak_provider.dart';
 import '../../../streak/presentation/widgets/streak_badge.dart';
 import '../widgets/install_app_button.dart';
+import '../widgets/whatsapp_support_button.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -123,6 +124,8 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 14.h),
                 const InstallAppButton(),
+                SizedBox(height: 14.h),
+                const WhatsappSupportButton(),
                 SizedBox(height: 28.h),
                 Text(
                   AppStrings.keepGoing,
@@ -159,7 +162,7 @@ class _ContinueCard extends StatelessWidget {
         : '${AppStrings.continueReading} • ${surah!.nameAr}';
 
     return Material(
-      color: AppColors.card(context),
+      color: AppColors.primaryGreen,
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: onTap,
@@ -184,7 +187,7 @@ class _ContinueCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: AppColors.heading(context),
+                  color: AppColors.white,
                   fontSize: 16.sp,
                 ),
               ),
@@ -194,7 +197,7 @@ class _ContinueCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: AppColors.subtle(context),
+                    color: AppColors.goldSoft,
                   ),
                 ),
             ],
@@ -279,7 +282,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: highlight ? AppColors.primary : AppColors.card(context),
+      color: AppColors.primaryGreen,
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: onTap,
@@ -291,7 +294,9 @@ class _ActionCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
             border: Border.all(
-              color: highlight ? AppColors.gold : AppColors.border(context),
+              color: highlight
+                  ? AppColors.gold
+                  : AppColors.gold.withValues(alpha: 0.35),
             ),
           ),
           child: Column(
@@ -300,7 +305,7 @@ class _ActionCard extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: highlight ? AppColors.goldSoft : AppColors.heading(context),
+                color: AppColors.goldSoft,
                 size: 30.sp,
               ),
               SizedBox(height: 18.h),
@@ -312,7 +317,7 @@ class _ActionCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 15.sp,
-                  color: highlight ? AppColors.white : AppColors.heading(context),
+                  color: AppColors.white,
                 ),
               ),
               SizedBox(height: 4.h),
@@ -323,9 +328,7 @@ class _ActionCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11.sp,
-                  color: highlight
-                      ? AppColors.white.withValues(alpha: 0.8)
-                      : AppColors.subtle(context),
+                  color: AppColors.white.withValues(alpha: 0.82),
                 ),
               ),
             ],

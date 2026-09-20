@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/mushaf_assets.dart';
 import '../../../../core/theme/reading_options.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../domain/entities/ayah.dart';
 import '../providers/quran_provider.dart';
 import 'mushaf_text_page.dart';
@@ -49,11 +50,10 @@ class _MushafPageViewState extends State<MushafPageView> {
   @override
   Widget build(BuildContext context) {
     final backdrop = context.watch<ThemeProvider>().backdrop;
-    final centered = MushafAssets.usesCenteredLayout(widget.pageNumber);
     final page = Image.asset(
       MushafAssets.pagePath(widget.pageNumber),
       fit: BoxFit.contain,
-      alignment: centered ? Alignment.center : Alignment.topCenter,
+      alignment: Alignment.center,
       filterQuality: FilterQuality.high,
       gaplessPlayback: true,
       errorBuilder: (_, __, ___) => MushafTextPage(
@@ -71,55 +71,63 @@ class _MushafPageViewState extends State<MushafPageView> {
       );
     }
 
-    return ColoredBox(
+    return AnimatedContainer(
+      duration: kReadingBackdropAnim,
+      curve: Curves.easeInOut,
       color: backdrop.canvas,
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: widget.fullscreen ? 4 : 8,
-          vertical: widget.fullscreen ? 4 : 6,
+        padding: Responsive.mushafPageInsets(
+          context,
+          fullscreen: widget.fullscreen,
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final size = Size(constraints.maxWidth, constraints.maxHeight);
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTapDown: (details) => _saveAyahAt(details.localPosition, size),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  content,
-                  if (_marker != null)
-                    Positioned(
-                      left: _marker!.dx - 16,
-                      top: _marker!.dy - 16,
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withValues(alpha: 0.92),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.gold.withValues(alpha: 0.45),
-                                blurRadius: 10,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: MushafAssets.pageAspectRatio,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final size = Size(constraints.maxWidth, constraints.maxHeight);
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: (details) =>
+                      _saveAyahAt(details.localPosition, size),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      content,
+                      if (_marker != null)
+                        Positioned(
+                          left: _marker!.dx - 16,
+                          top: _marker!.dy - 16,
+                          child: IgnorePointer(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AppColors.gold.withValues(alpha: 0.92),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.gold.withValues(alpha: 0.45),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: const SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: Icon(
-                              Icons.bookmark_added_rounded,
-                              size: 18,
-                              color: Colors.white,
+                              child: const SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: Icon(
+                                  Icons.bookmark_added_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

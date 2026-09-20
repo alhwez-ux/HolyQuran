@@ -23,9 +23,12 @@ class AppColors {
   static const Color white = Color(0xFFFFFFF8);
   static const Color mushafPaper = Color(0xFFF8F3E8);
 
-  static const Color readingOffWhite = Color(0xFFF3F0E8);
-  static const Color readingLightGreen = Color(0xFFE6F0E3);
-  static const Color readingLightMarine = Color(0xFFE2EEF4);
+  static const Color readingOffWhite = Color(0xFFF5F2EB);
+  static const Color readingLightGreen = Color(0xFFE6F1EA);
+  static const Color readingLightMarine = Color(0xFFE1EEF4);
+  static const Color readingWarmCream = Color(0xFFF4E8D0);
+  static const Color readingDesertSand = Color(0xFFE7D4B8);
+  static const Color readingPearlGray = Color(0xFFE4E0D8);
   static const Color readingNavy = Color(0xFF0B1C2C);
   static const Color readingNavyPanel = Color(0xFF122536);
   static const Color readingNavyText = Color(0xFFE6DCC8);

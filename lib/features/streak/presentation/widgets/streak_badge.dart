@@ -28,15 +28,12 @@ class StreakBadge extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight],
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-            ),
+            color: AppColors.primaryGreen,
             borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.25),
+                color: AppColors.primaryGreen.withValues(alpha: 0.25),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),

@@ -25,7 +25,7 @@ class ReadingSettingsSheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: context.read<ThemeProvider>().backdrop.panel,
+      backgroundColor: Colors.transparent,
       builder: (_) => ReadingSettingsSheet(
         fullscreen: fullscreen,
         onToggleFullscreen: onToggleFullscreen,
@@ -38,7 +38,10 @@ class ReadingSettingsSheet extends StatelessWidget {
     final settings = context.watch<ThemeProvider>();
     final backdrop = settings.backdrop;
 
-    return Padding(
+    return AnimatedContainer(
+      duration: kReadingBackdropAnim,
+      curve: Curves.easeInOut,
+      color: backdrop.panel,
       padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -63,24 +66,28 @@ class ReadingSettingsSheet extends StatelessWidget {
             ),
           ),
           SizedBox(height: 12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
             children: [
-              for (final option in ReadingBackdrop.values) ...[
+              for (final option in ReadingBackdrop.values)
                 _BackdropSwatch(
                   option: option,
                   selected: settings.backdrop == option,
                   onTap: () => settings.setBackdrop(option),
                 ),
-                if (option != ReadingBackdrop.navyNight) SizedBox(width: 12.w),
-              ],
             ],
           ),
-          SizedBox(height: 8.h),
-          Text(
-            backdrop.label,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13.sp, color: backdrop.body),
+          SizedBox(height: 10.h),
+          AnimatedSwitcher(
+            duration: kReadingBackdropAnim,
+            child: Text(
+              backdrop.label,
+              key: ValueKey(backdrop.name),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.sp, color: backdrop.body),
+            ),
           ),
           SizedBox(height: 18.h),
           Text(
@@ -165,9 +172,10 @@ class _BackdropSwatch extends StatelessWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 42,
-          height: 42,
+          duration: kReadingBackdropAnim,
+          curve: Curves.easeInOut,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
             color: option.canvas,
             shape: BoxShape.circle,
@@ -184,6 +192,13 @@ class _BackdropSwatch extends StatelessWidget {
                   ]
                 : null,
           ),
+          child: option.isNight
+              ? Icon(
+                  Icons.dark_mode_rounded,
+                  size: 16,
+                  color: selected ? AppColors.goldSoft : const Color(0xFFE6DCC8),
+                )
+              : null,
         ),
       ),
     );

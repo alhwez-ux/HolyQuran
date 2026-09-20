@@ -151,11 +151,14 @@ void main() {
   testWidgets('عرض المحتوى لا يتجاوز الحدود على الحاسوب', (tester) async {
     _setView(tester, const Size(1920, 1080));
     late double maxWidth;
+    late EdgeInsets fullscreenInsets;
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (context) {
             maxWidth = Responsive.maxContentWidth(context);
+            fullscreenInsets =
+                Responsive.mushafPageInsets(context, fullscreen: true);
             return const SizedBox.shrink();
           },
         ),
@@ -164,6 +167,13 @@ void main() {
     expect(maxWidth, 840);
     expect(Responsive.indexPaneWidth(1920), inInclusiveRange(220, 300));
     expect(Responsive.indexPaneWidth(600), inInclusiveRange(220, 300));
+    expect(Responsive.mushafFullscreenGutter(390), 14);
+    expect(Responsive.mushafFullscreenGutter(768), 18);
+    expect(Responsive.mushafFullscreenGutter(1280), 24);
+    expect(fullscreenInsets.left, 24);
+    expect(fullscreenInsets.right, 24);
+    expect(fullscreenInsets.top, 18);
+    expect(fullscreenInsets.bottom, greaterThan(fullscreenInsets.top + 20));
   });
 
   for (final size in _sizes) {

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/theme/reading_options.dart';
 import '../../../../core/utils/arabic_digits.dart';
 
 /// الشريط السفلي لشاشة القراءة، مرتّب يمينًا إلى يسار.
@@ -34,8 +35,12 @@ class ReadingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Material(
+      child: AnimatedContainer(
+        duration: kReadingBackdropAnim,
+        curve: Curves.easeInOut,
         color: panelColor,
+        child: Material(
+        color: Colors.transparent,
         elevation: 8,
         child: Padding(
           padding: EdgeInsets.fromLTRB(6.w, 8.h, 6.w, 8.h),
@@ -86,6 +91,7 @@ class ReadingBottomBar extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

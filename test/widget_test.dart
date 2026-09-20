@@ -24,6 +24,7 @@ void main() {
     expect(MushafAssets.totalPages, 604);
     expect(MushafAssets.pagePath(1), 'assets/mushaf/pages/001.png');
     expect(MushafAssets.pagePath(604), 'assets/mushaf/pages/604.png');
+    expect(MushafAssets.pageAspectRatio, closeTo(1024 / 1656, 0.0001));
   });
 
   test('الأرقام العربية لترقيم الصفحات', () {

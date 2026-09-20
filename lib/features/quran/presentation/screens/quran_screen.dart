@@ -31,11 +31,15 @@ class QuranScreen extends StatefulWidget {
 
 class _QuranScreenState extends State<QuranScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  PageController? _controller;
+  PageController? _pageController;
+  ScrollController? _scrollController;
   late int _page;
   bool? _twoPageSpread;
   Axis? _axis;
   bool _fullscreen = false;
+
+  bool get _pagerReady =>
+      _axis == Axis.vertical ? _scrollController != null : _pageController != null;
 
   @override
   void initState() {
@@ -64,22 +68,58 @@ class _QuranScreenState extends State<QuranScreen> {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _controller?.dispose();
+    _pageController?.dispose();
+    _scrollController?.dispose();
     super.dispose();
   }
 
   void _syncController({required bool spread, required Axis axis}) {
-    if (_twoPageSpread == spread && _axis == axis && _controller != null) {
+    if (_twoPageSpread == spread &&
+        _axis == axis &&
+        (_axis == Axis.vertical
+            ? _scrollController != null
+            : _pageController != null)) {
       return;
     }
-    _controller?.dispose();
+    final oldPageController = _pageController;
+    final oldScrollController = _scrollController;
+    _pageController = null;
+    _scrollController = null;
     _twoPageSpread = spread;
     _axis = axis;
-    _controller = PageController(
-      initialPage: spread
-          ? MushafPager.spreadIndexForPage(_page)
-          : _page - 1,
+    if (axis == Axis.vertical) {
+      _scrollController = ScrollController();
+    } else {
+      _pageController = PageController(
+        initialPage: spread
+            ? MushafPager.spreadIndexForPage(_page)
+            : _page - 1,
+      );
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      oldPageController?.dispose();
+      oldScrollController?.dispose();
+    });
+  }
+
+  Future<void> _scrollToVerticalPage(int page, {required bool animate}) async {
+    final controller = _scrollController;
+    if (controller == null || !controller.hasClients) return;
+    final extent = controller.position.viewportDimension;
+    if (extent <= 0) return;
+    final target = ((page - 1) * extent).clamp(
+      0.0,
+      controller.position.maxScrollExtent,
     );
+    if (animate) {
+      await controller.animateTo(
+        target,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      controller.jumpTo(target);
+    }
   }
 
   Future<void> _persistPage(int page) async {
@@ -101,9 +141,13 @@ class _QuranScreenState extends State<QuranScreen> {
   }
 
   Future<void> _goToPage(int page) async {
-    final controller = _controller;
-    if (controller == null || !controller.hasClients) return;
     final bounded = page.clamp(1, MushafAssets.totalPages);
+    if (_axis == Axis.vertical) {
+      await _scrollToVerticalPage(bounded, animate: true);
+      return;
+    }
+    final controller = _pageController;
+    if (controller == null || !controller.hasClients) return;
     final spread = _twoPageSpread ?? false;
     await controller.animateToPage(
       spread ? MushafPager.spreadIndexForPage(bounded) : bounded - 1,
@@ -115,12 +159,16 @@ class _QuranScreenState extends State<QuranScreen> {
   Future<void> _openSurah(Surah surah) async {
     final quran = context.read<QuranProvider>();
     final page = quran.firstPageOf(surah.number);
-    final controller = _controller;
-    final spread = _twoPageSpread ?? false;
-    if (controller != null && controller.hasClients) {
-      controller.jumpToPage(
-        spread ? MushafPager.spreadIndexForPage(page) : page - 1,
-      );
+    if (_axis == Axis.vertical) {
+      await _scrollToVerticalPage(page, animate: false);
+    } else {
+      final controller = _pageController;
+      final spread = _twoPageSpread ?? false;
+      if (controller != null && controller.hasClients) {
+        controller.jumpToPage(
+          spread ? MushafPager.spreadIndexForPage(page) : page - 1,
+        );
+      }
     }
     await _persistPage(page);
     if (!mounted) return;
@@ -218,16 +266,24 @@ class _QuranScreenState extends State<QuranScreen> {
             !settings.pageTurn.isVertical &&
             constraints.maxWidth >= 1024;
         final indexWidth = Responsive.indexPaneWidth(constraints.maxWidth);
-        final controller = _controller;
-
-        return Scaffold(
+        return AnimatedContainer(
+          duration: kReadingBackdropAnim,
+          curve: Curves.easeInOut,
+          color: backdrop.canvas,
+          child: Scaffold(
           key: _scaffoldKey,
-          backgroundColor: backdrop.canvas,
+          backgroundColor: Colors.transparent,
           appBar: _fullscreen
               ? null
               : AppBar(
-                  backgroundColor: backdrop.panel,
+                  backgroundColor: Colors.transparent,
                   foregroundColor: backdrop.heading,
+                  elevation: 0,
+                  flexibleSpace: AnimatedContainer(
+                    duration: kReadingBackdropAnim,
+                    curve: Curves.easeInOut,
+                    color: backdrop.panel,
+                  ),
                   title: Text(
                     '$surahName  •  ${AppStrings.pageLabel} ${toArabicDigits(_page)}',
                     maxLines: 1,
@@ -278,7 +334,7 @@ class _QuranScreenState extends State<QuranScreen> {
                     ),
                   ),
                 ),
-          body: controller == null
+          body: !_pagerReady
               ? const Center(child: CircularProgressIndicator())
               : split
                   ? Row(
@@ -298,7 +354,9 @@ class _QuranScreenState extends State<QuranScreen> {
                         ),
                         Expanded(
                           child: MushafPager(
-                            controller: controller,
+                            pageController: _pageController,
+                            scrollController: _scrollController,
+                            currentPage: _page,
                             twoPageSpread: spread,
                             scrollDirection: settings.pageTurn.isVertical
                                 ? Axis.vertical
@@ -312,7 +370,9 @@ class _QuranScreenState extends State<QuranScreen> {
                       ],
                     )
                   : MushafPager(
-                      controller: controller,
+                      pageController: _pageController,
+                      scrollController: _scrollController,
+                      currentPage: _page,
                       twoPageSpread: false,
                       scrollDirection: settings.pageTurn.isVertical
                           ? Axis.vertical
@@ -343,6 +403,7 @@ class _QuranScreenState extends State<QuranScreen> {
                   child: const Icon(Icons.tune_rounded),
                 )
               : null,
+        ),
         );
       },
     );

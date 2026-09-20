@@ -3,6 +3,9 @@ class MushafAssets {
   MushafAssets._();
 
   static const int totalPages = 604;
+  static const int pagePixelWidth = 1024;
+  static const int pagePixelHeight = 1656;
+  static const double pageAspectRatio = pagePixelWidth / pagePixelHeight;
   static const String directory = 'assets/mushaf/pages';
 
   /// صفحة الفاتحة والصفحة الأولى من البقرة في مصحف المدينة.

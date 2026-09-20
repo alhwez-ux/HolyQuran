@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/mushaf_assets.dart';
-import '../../../../core/theme/reading_options.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/utils/arabic_digits.dart';
+import '../../../../core/utils/responsive.dart';
 import '../../domain/entities/ayah.dart';
 import '../providers/quran_provider.dart';
 
@@ -33,10 +33,15 @@ class MushafTextPage extends StatelessWidget {
     final centered = MushafAssets.usesCenteredLayout(pageNumber);
     final scale = fullscreen ? 1.28 : 1.0;
 
-    return ColoredBox(
+    return AnimatedContainer(
+      duration: kReadingBackdropAnim,
+      curve: Curves.easeInOut,
       color: backdrop.canvas,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+        padding: Responsive.mushafPageInsets(
+          context,
+          fullscreen: fullscreen,
+        ),
         child: Column(
           children: [
             if (segments.isNotEmpty)

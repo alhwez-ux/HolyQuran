@@ -105,7 +105,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
     if (!kIsWeb || _installed) return const SizedBox.shrink();
 
     return Material(
-      color: AppColors.card(context),
+      color: AppColors.primaryGreen,
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: _onTap,
@@ -115,7 +115,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
-            border: Border.all(color: AppColors.gold.withValues(alpha: 0.45)),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -138,7 +138,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15.sp,
-                        color: AppColors.heading(context),
+                        color: AppColors.white,
                       ),
                     ),
                     Text(
@@ -148,7 +148,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: AppColors.subtle(context),
+                        color: AppColors.white.withValues(alpha: 0.82),
                       ),
                     ),
                   ],

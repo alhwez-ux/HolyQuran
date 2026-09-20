@@ -76,4 +76,9 @@ class AppStrings {
   static const String pageTurnVertical = 'تمرير رأسي';
   static const String enterFullscreen = 'ملء الشاشة';
   static const String exitFullscreen = 'إنهاء ملء الشاشة';
+
+  static const String suggestionsAndSupport = 'الاقتراحات والدعم';
+  static const String whatsappSupportSubtitle = 'تواصل معنا عبر واتساب';
+  static const String whatsappNumber = '0555748375';
+  static const String whatsappOpenFailed = 'تعذر فتح واتساب، حاول مرة أخرى';
 }

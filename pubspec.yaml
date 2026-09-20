@@ -18,6 +18,7 @@ dependencies:
   path_provider: ^2.1.2        # مسارات التخزين المحلي للأجهزة المختلفة
   quran: ^1.4.1                # ترقيم صفحات مصحف المدينة أوفلاين
   share_plus: ^11.0.0          # مشاركة بطاقة الحديث
+  url_launcher: ^6.3.1         # فتح واتساب للاقتراحات والدعم
 
 dev_dependencies:
   flutter_test:
