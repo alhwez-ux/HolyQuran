@@ -27,6 +27,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
+          fontFamily: 'Amiri',
           fontSize: 20.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.primary,
@@ -59,6 +60,63 @@ class AppTheme {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
+      ),
+    );
+  }
+
+  static ThemeData dark() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      fontFamily: 'Amiri',
+      scaffoldBackgroundColor: AppColors.backgroundNight,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.goldSoft,
+        onPrimary: AppColors.backgroundNight,
+        secondary: AppColors.gold,
+        onSecondary: AppColors.backgroundNight,
+        surface: AppColors.surfaceNight,
+        onSurface: AppColors.inkNight,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.parchmentNight,
+        foregroundColor: AppColors.goldSoft,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 20.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.goldSoft,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.surfaceNight,
+        elevation: AppSizes.cardElevation,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusM.r),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceNight,
+        hintStyle: TextStyle(color: AppColors.mutedNight, fontSize: 14.sp),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusM.r),
+          borderSide: const BorderSide(color: AppColors.borderNight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusM.r),
+          borderSide: const BorderSide(color: AppColors.borderNight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusM.r),
+          borderSide: const BorderSide(color: AppColors.gold, width: 1.4),
+        ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.goldAccent,
+        foregroundColor: AppColors.backgroundNight,
       ),
     );
   }

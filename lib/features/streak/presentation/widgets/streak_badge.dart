@@ -25,77 +25,73 @@ class StreakBadge extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
         child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: (64.w).clamp(48.0, 72.0),
-            height: (64.w).clamp(48.0, 72.0),
-            decoration: BoxDecoration(
-              color: AppColors.gold.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.goldSoft, width: 1.4),
+          width: double.infinity,
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
             ),
-            child: Icon(
-              Icons.local_fire_department_rounded,
-              color: AppColors.goldSoft,
-              size: 34.sp,
-            ),
+            borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.25),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.streakTitle,
-                  style: TextStyle(
-                    color: AppColors.goldSoft,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
+          child: Column(
+            children: [
+              Container(
+                width: (64.w).clamp(48.0, 72.0),
+                height: (64.w).clamp(48.0, 72.0),
+                decoration: BoxDecoration(
+                  color: AppColors.gold.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.goldSoft, width: 1.4),
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  '${streak.current} $daysLabel',
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
-                  ),
+                child: Icon(
+                  Icons.local_fire_department_rounded,
+                  color: AppColors.goldSoft,
+                  size: 34.sp,
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  today
-                      ? AppStrings.wirdDone
-                      : '${AppStrings.longestStreak}: ${streak.longest}',
-                  style: TextStyle(
-                    color: AppColors.white.withValues(alpha: 0.82),
-                    fontSize: 13.sp,
-                  ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                AppStrings.streakTitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.goldSoft,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                '${streak.current} $daysLabel',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                today
+                    ? AppStrings.wirdDone
+                    : '${AppStrings.longestStreak}: ${streak.longest}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.white.withValues(alpha: 0.82),
+                  fontSize: 13.sp,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
         ),
       ),
     );

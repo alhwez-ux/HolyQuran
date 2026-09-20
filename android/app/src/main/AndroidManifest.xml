@@ -7,7 +7,7 @@
         android:anyDensity="true"
         android:resizeable="true" />
     <application
-        android:label="ختم القرآن"
+        android:label="ختمة القرآن الكريم"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

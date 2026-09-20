@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/mushaf_assets.dart';
+import '../../domain/ayah_locator.dart';
 import '../../domain/entities/ayah.dart';
 import '../../domain/entities/mushaf_page_segment.dart';
 import '../../domain/entities/reading_progress.dart';
@@ -89,18 +90,56 @@ class QuranProvider extends ChangeNotifier {
     _progress = ReadingProgress(
       surahNumber: surahNumber,
       ayahNumber: ayahNumber,
-      pageNumber: pageNumber ?? _repository.pageNumberFor(surahNumber, ayahNumber),
+      pageNumber:
+          pageNumber ?? _repository.pageNumberFor(surahNumber, ayahNumber),
     );
     await _saveProgress(_progress);
     notifyListeners();
   }
 
+  Future<void> saveStopAyah(Ayah ayah, {int? pageNumber}) {
+    return savePosition(
+      surahNumber: ayah.surahNumber,
+      ayahNumber: ayah.number,
+      pageNumber: pageNumber,
+    );
+  }
+
+  Ayah? ayahAtPageFraction(int pageNumber, double fraction) {
+    final ayahs = ayahsOnPage(pageNumber);
+    if (ayahs.isEmpty) return null;
+    final index = ayahIndexForFraction(
+      ayahCount: ayahs.length,
+      fraction: fraction,
+      centered: MushafAssets.usesCenteredLayout(pageNumber),
+    );
+    return ayahs[index];
+  }
+
+  bool isStopAyah(Ayah ayah) {
+    return _progress.surahNumber == ayah.surahNumber &&
+        _progress.ayahNumber == ayah.number;
+  }
+
   Future<void> savePage(int pageNumber) async {
     final bounded = pageNumber.clamp(1, MushafAssets.totalPages);
-    final first = _repository.segmentsOnPage(bounded).first;
+    final ayahs = _repository.ayahsOnPage(bounded);
+    if (ayahs.isEmpty) {
+      final first = _repository.segmentsOnPage(bounded).first;
+      await savePosition(
+        surahNumber: first.surahNumber,
+        ayahNumber: first.startAyah,
+        pageNumber: bounded,
+      );
+      return;
+    }
+    final keepStop = ayahs.any(isStopAyah);
+    final chosen = keepStop
+        ? ayahs.firstWhere(isStopAyah)
+        : ayahs.first;
     await savePosition(
-      surahNumber: first.surahNumber,
-      ayahNumber: first.startAyah,
+      surahNumber: chosen.surahNumber,
+      ayahNumber: chosen.number,
       pageNumber: bounded,
     );
   }

@@ -26,7 +26,7 @@ class SurahIndexPane extends StatelessWidget {
     final quran = context.watch<QuranProvider>();
 
     return ColoredBox(
-      color: AppColors.parchment,
+      color: AppColors.panel(context),
       child: Column(
         children: [
           Padding(
@@ -45,7 +45,7 @@ class SurahIndexPane extends StatelessWidget {
                 ? Center(
                     child: Text(
                       AppStrings.noResults,
-                      style: TextStyle(color: AppColors.muted, fontSize: 14.sp),
+                      style: TextStyle(color: AppColors.subtle(context), fontSize: 14.sp),
                     ),
                   )
                 : ListView.separated(

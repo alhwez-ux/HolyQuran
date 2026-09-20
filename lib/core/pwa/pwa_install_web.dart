@@ -1,35 +1,40 @@
 import 'dart:js_interop';
-
-@JS('ahlQuranPwa')
-extension type _AhlQuranPwa(JSObject _) implements JSObject {
-  external JSBoolean canInstall();
-  external JSBoolean isInstalled();
-  external JSBoolean isIos();
-  external JSPromise<JSBoolean> install();
-}
-
-@JS('ahlQuranPwa')
-external _AhlQuranPwa? get _pwa;
+import 'dart:js_interop_unsafe';
 
 /// تثبيت تطبيق الويب التقدمي من المتصفح.
 class PwaInstall {
   PwaInstall._();
 
-  static bool get supported => _pwa != null;
+  static JSObject? get _api {
+    if (!globalContext.has('ahlQuranPwa')) return null;
+    final value = globalContext.getProperty('ahlQuranPwa'.toJS);
+    if (value.isUndefinedOrNull) return null;
+    return value as JSObject;
+  }
 
-  static bool get isInstalled => _pwa?.isInstalled().toDart ?? false;
+  static bool get supported => _api != null;
 
-  static bool get canInstall => _pwa?.canInstall().toDart ?? false;
+  static bool _boolMethod(String name) {
+    final api = _api;
+    if (api == null) return false;
+    final result = api.callMethod(name.toJS);
+    return (result as JSBoolean).toDart;
+  }
 
-  static bool get showIosGuide => _pwa?.isIos().toDart ?? false;
+  static bool get isInstalled => _boolMethod('isInstalled');
+
+  static bool get canInstall => _boolMethod('canInstall');
+
+  static bool get showIosGuide => _boolMethod('isIos');
 
   static bool get shouldOfferInstall =>
       supported && !isInstalled && (canInstall || showIosGuide);
 
   static Future<bool> promptInstall() async {
-    final api = _pwa;
+    final api = _api;
     if (api == null) return false;
-    final result = await api.install().toDart;
-    return result.toDart;
+    final result = api.callMethod('install'.toJS);
+    final settled = await (result as JSPromise<JSBoolean>).toDart;
+    return settled.toDart;
   }
 }

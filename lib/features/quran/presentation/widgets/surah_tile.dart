@@ -24,8 +24,8 @@ class SurahTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected
-          ? AppColors.primary.withValues(alpha: 0.08)
-          : AppColors.surface,
+          ? AppColors.primary.withValues(alpha: AppColors.isDark(context) ? 0.22 : 0.08)
+          : AppColors.card(context),
       borderRadius: BorderRadius.circular(AppSizes.radiusM.r),
       child: InkWell(
         onTap: onTap,
@@ -73,7 +73,7 @@ class SurahTile extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: AppColors.parchment,
+                  color: AppColors.panel(context),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(

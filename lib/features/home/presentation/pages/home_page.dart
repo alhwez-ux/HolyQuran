@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/theme/theme_toggle_button.dart';
+import '../../../../core/utils/arabic_digits.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../quran/domain/entities/surah.dart';
 import '../../../quran/presentation/screens/quran_screen.dart';
@@ -45,6 +47,7 @@ class HomePage extends StatelessWidget {
     final started = quran.progress.hasStarted;
 
     return Scaffold(
+      backgroundColor: AppColors.scaffold(context),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -55,8 +58,10 @@ class HomePage extends StatelessWidget {
               padding: Responsive.pagePadding(context),
               children: [
                 SizedBox(height: 8.h),
+                const ThemeToggleButton(),
+                SizedBox(height: 16.h),
                 Text(
-                  AppStrings.welcomeAbuNayef,
+                  AppStrings.welcomeReader,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.sp,
@@ -64,22 +69,26 @@ class HomePage extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 10.h),
                 Text(
                   AppStrings.appName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 36.sp,
+                    fontSize: 32.sp,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    height: 1.35,
+                    color: AppColors.heading(context),
                   ),
                 ),
+                SizedBox(height: 8.h),
                 Text(
                   AppStrings.appTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.muted,
+                    fontSize: 15.sp,
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.subtle(context),
                   ),
                 ),
                 SizedBox(height: 24.h),
@@ -119,7 +128,7 @@ class HomePage extends StatelessWidget {
                   AppStrings.keepGoing,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.muted,
+                    color: AppColors.subtle(context),
                     fontSize: 13.sp,
                   ),
                 ),
@@ -150,49 +159,44 @@ class _ContinueCard extends StatelessWidget {
         : '${AppStrings.continueReading} • ${surah!.nameAr}';
 
     return Material(
-      color: AppColors.surface,
+      color: AppColors.card(context),
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
         child: Container(
+          width: double.infinity,
           padding: EdgeInsets.all(18.w),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
             border: Border.all(color: AppColors.gold.withValues(alpha: 0.35)),
           ),
-          child: Row(
+          child: Column(
             children: [
               Icon(
                 Icons.play_circle_fill_rounded,
                 color: AppColors.gold,
-                size: 36.sp,
+                size: 40.sp,
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    if (started && surah != null)
-                      Text(
-                        '${AppStrings.lastPosition}: ${AppStrings.pageLabel} ${context.read<QuranProvider>().progress.pageNumber}',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.muted,
-                        ),
-                      ),
-                  ],
+              SizedBox(height: 10.h),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.heading(context),
+                  fontSize: 16.sp,
                 ),
               ),
-              Icon(Icons.chevron_left_rounded, color: AppColors.gold, size: 24.sp),
+              if (started && surah != null)
+                Text(
+                  '${AppStrings.lastPosition}: ${surah!.nameAr} • ${AppStrings.ayahLabel} ${toArabicDigits(context.read<QuranProvider>().progress.ayahNumber)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppColors.subtle(context),
+                  ),
+                ),
             ],
           ),
         ),
@@ -275,7 +279,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: highlight ? AppColors.primary : AppColors.surface,
+      color: highlight ? AppColors.primary : AppColors.card(context),
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: onTap,
@@ -287,39 +291,41 @@ class _ActionCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
             border: Border.all(
-              color: highlight ? AppColors.gold : AppColors.parchmentDark,
+              color: highlight ? AppColors.gold : AppColors.border(context),
             ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                color: highlight ? AppColors.goldSoft : AppColors.primary,
+                color: highlight ? AppColors.goldSoft : AppColors.heading(context),
                 size: 30.sp,
               ),
               SizedBox(height: 18.h),
               Text(
                 title,
+                textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 15.sp,
-                  color: highlight ? AppColors.white : AppColors.primary,
+                  color: highlight ? AppColors.white : AppColors.heading(context),
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 subtitle,
+                textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: highlight
                       ? AppColors.white.withValues(alpha: 0.8)
-                      : AppColors.muted,
+                      : AppColors.subtle(context),
                 ),
               ),
             ],

@@ -105,7 +105,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
     if (!kIsWeb || _installed) return const SizedBox.shrink();
 
     return Material(
-      color: AppColors.surface,
+      color: AppColors.card(context),
       borderRadius: BorderRadius.circular(AppSizes.radiusL.r),
       child: InkWell(
         onTap: _onTap,
@@ -118,6 +118,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
             border: Border.all(color: AppColors.gold.withValues(alpha: 0.45)),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.install_mobile_rounded,
@@ -125,36 +126,33 @@ class _InstallAppButtonState extends State<InstallAppButton> {
                 size: 28.sp,
               ),
               SizedBox(width: 12.w),
-              Expanded(
+              Flexible(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       AppStrings.installApp,
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15.sp,
-                        color: AppColors.primaryGreen,
+                        color: AppColors.heading(context),
                       ),
                     ),
                     Text(
                       AppStrings.installAppSubtitle,
+                      textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: AppColors.muted,
+                        color: AppColors.subtle(context),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Icon(
-                Icons.chevron_left_rounded,
-                color: AppColors.goldAccent,
-                size: 22.sp,
               ),
             ],
           ),

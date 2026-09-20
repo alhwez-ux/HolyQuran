@@ -4,23 +4,37 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/mushaf_assets.dart';
+import '../../../../core/theme/reading_options.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/utils/arabic_digits.dart';
+import '../../domain/entities/ayah.dart';
 import '../providers/quran_provider.dart';
 
 /// عرض نصّي لصفحة المصحف إن تعذّر تحميل الصورة المحلية.
 class MushafTextPage extends StatelessWidget {
-  const MushafTextPage({super.key, required this.pageNumber});
+  const MushafTextPage({
+    super.key,
+    required this.pageNumber,
+    this.fullscreen = false,
+    this.onAyahTap,
+  });
 
   final int pageNumber;
+  final bool fullscreen;
+  final ValueChanged<Ayah>? onAyahTap;
 
   @override
   Widget build(BuildContext context) {
     final quran = context.watch<QuranProvider>();
+    final backdrop = context.watch<ThemeProvider>().backdrop;
     final segments = quran.segmentsOnPage(pageNumber);
     final ayahs = quran.ayahsOnPage(pageNumber);
+    final centered = MushafAssets.usesCenteredLayout(pageNumber);
+    final scale = fullscreen ? 1.28 : 1.0;
 
     return ColoredBox(
-      color: AppColors.mushafPaper,
+      color: backdrop.canvas,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
         child: Column(
@@ -28,10 +42,11 @@ class MushafTextPage extends StatelessWidget {
             if (segments.isNotEmpty)
               Text(
                 quran.surahByNumber(segments.first.surahNumber).nameAr,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 22.sp,
+                  fontSize: 22.sp * scale,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
+                  color: backdrop.heading,
                 ),
               ),
             SizedBox(height: 12.h),
@@ -44,31 +59,38 @@ class MushafTextPage extends StatelessWidget {
                         TextSpan(
                           text: ayah.text,
                           style: TextStyle(
-                            fontSize: 24.sp,
-                            height: 2.1,
-                            color: AppColors.ink,
+                            fontSize: 24.sp * scale,
+                            height: 2.15,
+                            backgroundColor: quran.isStopAyah(ayah)
+                                ? AppColors.gold.withValues(alpha: 0.22)
+                                : null,
+                            color: backdrop.body,
                           ),
                         ),
                         TextSpan(
                           text: ' ﴿${toArabicDigits(ayah.number)}﴾ ',
                           style: TextStyle(
-                            fontSize: 16.sp,
-                            color: AppColors.gold,
+                            fontSize: 16.sp * scale,
+                            color: const Color(0xFFD4AF37),
                             fontWeight: FontWeight.w700,
+                            backgroundColor: quran.isStopAyah(ayah)
+                                ? AppColors.gold.withValues(alpha: 0.22)
+                                : null,
                           ),
                         ),
                       ],
                     ],
                   ),
-                  textAlign: TextAlign.justify,
+                  textAlign: centered ? TextAlign.center : TextAlign.justify,
                 ),
               ),
             ),
             Text(
               '${AppStrings.pageLabel} ${toArabicDigits(pageNumber)}',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.muted,
+                fontSize: 14.sp * scale,
+                color: backdrop.muted,
                 fontWeight: FontWeight.w600,
               ),
             ),

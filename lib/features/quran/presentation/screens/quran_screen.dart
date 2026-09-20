@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/mushaf_assets.dart';
+import '../../../../core/theme/reading_options.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/utils/arabic_digits.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../reward/presentation/pages/prophetic_reward_dialog.dart';
+import '../../domain/entities/ayah.dart';
 import '../../domain/entities/surah.dart';
 import '../providers/quran_provider.dart';
-import '../widgets/complete_wird_button.dart';
 import '../widgets/mushaf_pager.dart';
+import '../widgets/reading_bottom_bar.dart';
+import '../widgets/reading_settings_sheet.dart';
 import '../widgets/surah_index_pane.dart';
 
-/// شاشة عرض المصحف الرئيسية:
-/// هاتف = صفحة واحدة بملء الشاشة،
-/// تابلت = الفهرس بجانب الصفحة،
-/// حاسوب = الفهرس مع صفحتين متقابلتين،
-/// مع تقليب سلس وحفظ آخر صفحة في Hive.
+/// شاشة عرض المصحف: خلفيات القراءة، آية التوقف، ملء الشاشة، وتقليب الصفحات.
 class QuranScreen extends StatefulWidget {
   const QuranScreen({super.key, this.initialSurah});
 
@@ -33,6 +34,8 @@ class _QuranScreenState extends State<QuranScreen> {
   PageController? _controller;
   late int _page;
   bool? _twoPageSpread;
+  Axis? _axis;
+  bool _fullscreen = false;
 
   @override
   void initState() {
@@ -50,21 +53,33 @@ class _QuranScreenState extends State<QuranScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final spread = Responsive.usesTwoPageSpread(context);
-    if (_twoPageSpread == spread && _controller != null) return;
+    final settings = context.watch<ThemeProvider>();
+    final axis = settings.pageTurn.isVertical ? Axis.vertical : Axis.horizontal;
+    final spread = !settings.pageTurn.isVertical &&
+        !_fullscreen &&
+        Responsive.usesTwoPageSpread(context);
+    _syncController(spread: spread, axis: axis);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  void _syncController({required bool spread, required Axis axis}) {
+    if (_twoPageSpread == spread && _axis == axis && _controller != null) {
+      return;
+    }
     _controller?.dispose();
     _twoPageSpread = spread;
+    _axis = axis;
     _controller = PageController(
       initialPage: spread
           ? MushafPager.spreadIndexForPage(_page)
           : _page - 1,
     );
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
   }
 
   Future<void> _persistPage(int page) async {
@@ -119,11 +134,72 @@ class _QuranScreenState extends State<QuranScreen> {
     PropheticRewardDialog.show(context);
   }
 
-  int get _step => (_twoPageSpread ?? false) ? 2 : 1;
+  void _jumpToStopAyah() {
+    final page = context.read<QuranProvider>().progress.pageNumber;
+    _goToPage(page);
+  }
+
+  void _exitReading() {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _toggleFullscreen() async {
+    final next = !_fullscreen;
+    setState(() {
+      _fullscreen = next;
+      final settings = context.read<ThemeProvider>();
+      final axis =
+          settings.pageTurn.isVertical ? Axis.vertical : Axis.horizontal;
+      final spread = !next &&
+          !settings.pageTurn.isVertical &&
+          Responsive.usesTwoPageSpread(context);
+      _syncController(spread: spread, axis: axis);
+    });
+    await SystemChrome.setEnabledSystemUIMode(
+      next ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
+    );
+  }
+
+  Future<void> _onAyahTapped(Ayah ayah) async {
+    await HapticFeedback.selectionClick();
+    await context.read<QuranProvider>().saveStopAyah(ayah);
+    if (!mounted) return;
+    final surah =
+        context.read<QuranProvider>().surahByNumber(ayah.surahNumber);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(milliseconds: 1400),
+        backgroundColor: AppColors.primaryGreen,
+        content: Text(
+          '${AppStrings.stopAyahSaved}: ${surah.nameAr} • ${AppStrings.ayahLabel} ${toArabicDigits(ayah.number)}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openSettings() {
+    ReadingSettingsSheet.show(
+      context: context,
+      fullscreen: _fullscreen,
+      onToggleFullscreen: _toggleFullscreen,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final quran = context.watch<QuranProvider>();
+    final settings = context.watch<ThemeProvider>();
+    final backdrop = settings.backdrop;
     final segments = quran.segmentsOnPage(_page);
     final surahName = segments.isEmpty
         ? AppStrings.mushaf
@@ -131,38 +207,70 @@ class _QuranScreenState extends State<QuranScreen> {
     final selectedSurah = segments.isEmpty
         ? quran.progress.surahNumber
         : segments.first.surahNumber;
+    final fontScale = _fullscreen ? 1.22 : 1.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final split = constraints.maxWidth >= 600;
-        final spread = constraints.maxWidth >= 1024;
+        final split = !_fullscreen &&
+            !settings.pageTurn.isVertical &&
+            constraints.maxWidth >= 600;
+        final spread = !_fullscreen &&
+            !settings.pageTurn.isVertical &&
+            constraints.maxWidth >= 1024;
         final indexWidth = Responsive.indexPaneWidth(constraints.maxWidth);
         final controller = _controller;
 
         return Scaffold(
           key: _scaffoldKey,
-          backgroundColor: AppColors.mushafPaper,
-          appBar: AppBar(
-            backgroundColor: AppColors.backgroundLight,
-            title: Text(
-              '$surahName  •  ${AppStrings.pageLabel} ${toArabicDigits(_page)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18.sp),
-            ),
-            actions: [
-              if (!split)
-                IconButton(
-                  tooltip: AppStrings.mushafIndex,
-                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                  icon: const Icon(Icons.list_alt_rounded),
+          backgroundColor: backdrop.canvas,
+          appBar: _fullscreen
+              ? null
+              : AppBar(
+                  backgroundColor: backdrop.panel,
+                  foregroundColor: backdrop.heading,
+                  title: Text(
+                    '$surahName  •  ${AppStrings.pageLabel} ${toArabicDigits(_page)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18.sp * fontScale,
+                      color: backdrop.heading,
+                    ),
+                  ),
+                  actions: [
+                    IconButton(
+                      tooltip: AppStrings.enterFullscreen,
+                      onPressed: _toggleFullscreen,
+                      icon: Icon(
+                        Icons.fullscreen_rounded,
+                        color: backdrop.heading,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: AppStrings.readingSettings,
+                      onPressed: _openSettings,
+                      icon: Icon(
+                        Icons.palette_rounded,
+                        color: backdrop.heading,
+                      ),
+                    ),
+                    if (!split)
+                      IconButton(
+                        tooltip: AppStrings.mushafIndex,
+                        onPressed: () =>
+                            _scaffoldKey.currentState?.openDrawer(),
+                        icon: Icon(
+                          Icons.list_alt_rounded,
+                          color: backdrop.heading,
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
           drawer: split
               ? null
               : Drawer(
-                  backgroundColor: AppColors.parchment,
+                  backgroundColor: backdrop.panel,
                   child: SafeArea(
                     child: SurahIndexPane(
                       selectedSurahNumber: selectedSurah,
@@ -172,113 +280,71 @@ class _QuranScreenState extends State<QuranScreen> {
                 ),
           body: controller == null
               ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  children: [
-                    Expanded(
-                      child: split
-                          ? Row(
-                              children: [
-                                SizedBox(
-                                  width: indexWidth,
-                                  child: SurahIndexPane(
-                                    compact: true,
-                                    selectedSurahNumber: selectedSurah,
-                                    onSelect: _openSurah,
-                                  ),
-                                ),
-                                const VerticalDivider(
-                                  width: 1,
-                                  thickness: 1,
-                                  color: AppColors.parchmentDark,
-                                ),
-                                Expanded(
-                                  child: MushafPager(
-                                    controller: controller,
-                                    twoPageSpread: spread,
-                                    onPageChanged: _persistPage,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : MushafPager(
-                              controller: controller,
-                              twoPageSpread: false,
-                              onPageChanged: _persistPage,
-                            ),
+              : split
+                  ? Row(
+                      children: [
+                        SizedBox(
+                          width: indexWidth,
+                          child: SurahIndexPane(
+                            compact: true,
+                            selectedSurahNumber: selectedSurah,
+                            onSelect: _openSurah,
+                          ),
+                        ),
+                        VerticalDivider(
+                          width: 1,
+                          thickness: 1,
+                          color: backdrop.panel,
+                        ),
+                        Expanded(
+                          child: MushafPager(
+                            controller: controller,
+                            twoPageSpread: spread,
+                            scrollDirection: settings.pageTurn.isVertical
+                                ? Axis.vertical
+                                : Axis.horizontal,
+                            fullscreen: _fullscreen,
+                            onToggleFullscreen: _toggleFullscreen,
+                            onAyahTap: _onAyahTapped,
+                            onPageChanged: _persistPage,
+                          ),
+                        ),
+                      ],
+                    )
+                  : MushafPager(
+                      controller: controller,
+                      twoPageSpread: false,
+                      scrollDirection: settings.pageTurn.isVertical
+                          ? Axis.vertical
+                          : Axis.horizontal,
+                      fullscreen: _fullscreen,
+                      onToggleFullscreen: _toggleFullscreen,
+                      onAyahTap: _onAyahTapped,
+                      onPageChanged: _persistPage,
                     ),
-                    _MushafControls(
-                      page: _page,
-                      step: _step,
-                      onPrevious: _page <= 1
-                          ? null
-                          : () => _goToPage(_page - _step),
-                      onNext: _page >= MushafAssets.totalPages
-                          ? null
-                          : () => _goToPage(_page + _step),
-                      onCompleteWird: _completeWird,
-                    ),
-                  ],
-                ),
+          bottomNavigationBar: ReadingBottomBar(
+            stopSurahName:
+                quran.surahByNumber(quran.progress.surahNumber).nameAr,
+            stopAyahNumber: quran.progress.ayahNumber,
+            isNight: settings.backdrop.isNight,
+            panelColor: backdrop.panel,
+            headingColor: backdrop.heading,
+            onStopAyah: _jumpToStopAyah,
+            onCompleteWird: _completeWird,
+            onToggleTheme: settings.toggle,
+            onExit: _exitReading,
+          ),
+          floatingActionButton: _fullscreen
+              ? FloatingActionButton.small(
+                  tooltip: AppStrings.readingSettings,
+                  backgroundColor: backdrop.panel,
+                  foregroundColor: backdrop.heading,
+                  onPressed: _openSettings,
+                  child: const Icon(Icons.tune_rounded),
+                )
+              : null,
         );
       },
-    );
-  }
-}
-
-class _MushafControls extends StatelessWidget {
-  const _MushafControls({
-    required this.page,
-    required this.step,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onCompleteWird,
-  });
-
-  final int page;
-  final int step;
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-  final VoidCallback onCompleteWird;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        color: AppColors.backgroundLight,
-        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  tooltip: AppStrings.previousPage,
-                  onPressed: onPrevious,
-                  icon: const Icon(Icons.chevron_right_rounded),
-                ),
-                Expanded(
-                  child: Text(
-                    '${toArabicDigits(page)} / ${toArabicDigits(MushafAssets.totalPages)}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                      fontSize: 16.sp,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: AppStrings.nextPage,
-                  onPressed: onNext,
-                  icon: const Icon(Icons.chevron_left_rounded),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            CompleteWirdButton(onPressed: onCompleteWird),
-          ],
-        ),
-      ),
     );
   }
 }

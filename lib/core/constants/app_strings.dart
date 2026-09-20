@@ -2,9 +2,10 @@
 class AppStrings {
   AppStrings._();
 
-  static const String appName = 'ختم القرآن';
-  static const String appTagline = 'مجمع الملك فهد لطباعة المصحف الشريف';
-  static const String welcomeAbuNayef = 'أهلاً بك يا أبو نايف';
+  static const String appName = 'ختمة القرآن الكريم';
+  static const String appTagline =
+      'نسخة من مصحف مجمع الملك فهد بالمدينة المنورة';
+  static const String welcomeReader = 'أهلاً بك يا قارئ القرآن';
 
   static const String continueReading = 'أكمل القراءة';
   static const String startReading = 'ابدأ القراءة';
@@ -20,8 +21,13 @@ class AppStrings {
   static const String makki = 'مكية';
   static const String madani = 'مدنية';
   static const String ayahs = 'آيات';
+  static const String ayahLabel = 'آية';
+  static const String stopAyah = 'آية التوقف';
+  static const String stopAyahSaved = 'حُفظت آية التوقف';
   static const String bismillah = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
   static const String completeWird = 'إتمام ورد اليوم';
+  static const String completeWirdShort = 'إتمام الورد';
+  static const String exitReading = 'خروج';
   static const String wirdDone = 'تقبّل الله.. وِرد اليوم مكتمل';
   static const String bookmarkSaved = 'حُفظ موضع القراءة';
   static const String lastPosition = 'آخر موضع';
@@ -59,4 +65,15 @@ class AppStrings {
       'في سفاري: اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية» لتثبيت التطبيق.';
   static const String installBrowserHint =
       'من شريط العنوان اختر أيقونة التثبيت أو قائمة المتصفح ثم «تثبيت التطبيق».';
+
+  static const String dayMode = 'النهاري';
+  static const String nightMode = 'الليلي';
+  static const String toggleReadingTheme = 'تبديل الوضع الليلي والنهاري';
+  static const String readingSettings = 'إعدادات القراءة';
+  static const String readingBackgrounds = 'خلفية القراءة';
+  static const String pageTurnStyle = 'طريقة تقليب الصفحات';
+  static const String pageTurnHorizontal = 'تقليب أفقي';
+  static const String pageTurnVertical = 'تمرير رأسي';
+  static const String enterFullscreen = 'ملء الشاشة';
+  static const String exitFullscreen = 'إنهاء ملء الشاشة';
 }
